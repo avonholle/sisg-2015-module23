@@ -31,4 +31,22 @@ library(ggplot2)
 p <- ggplot(snp.data, aes(x = factor(snp), y = y))
 p + geom_boxplot() + xlab("Reference allele count")
 
-# test 123 
+
+twin.data <- read.table("practical_1/data/twin_height_bmi.txt", header = T)
+
+dim(twin.data)
+head(twin.data)
+
+twin.mz <- twin.data[twin.data$twin == "MZ", ]
+cor(twin.mz $ht_t1, twin.mz $ht_t2)
+
+p <- ggplot(twin.mz, aes(x = ht_t1, y = ht_t2))
+p + geom_point() + geom_smooth(method = "lm")
+# Dizygotic twins
+twin.dz <- twin.data[twin.data$twin == "DZ", ]
+cor(twin.dz$ht_t1, twin.dz$ht_t2)
+p <- ggplot(twin.dz, aes(x = ht_t1, y = ht_t2))
+p + geom_point() + geom_smooth(method = "lm")
+
+ped <- read.table("practical_1/data/height_bmi.ped", header = F)
+dim(ped)
