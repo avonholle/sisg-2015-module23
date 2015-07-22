@@ -25,9 +25,10 @@ snp <- rbinom(1000, 2, 0.4)
 y <- rnorm(1000, y.means[factor(snp)], y.sd)
 snp.data <- data.frame(cbind(y, snp))
 
-
 # Plot the phenotype as a factored boxplot of the underlying genotype counts
 # Load ggplot2
 library(ggplot2)
 p <- ggplot(snp.data, aes(x = factor(snp), y = y))
 p + geom_boxplot() + xlab("Reference allele count")
+
+# test 123 
