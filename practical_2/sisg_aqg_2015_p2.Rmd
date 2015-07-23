@@ -92,6 +92,8 @@ setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/
 # Once you've set up your binary directory for this analysis and have set R to that directory, do this:
 system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we- -veg-", intern=TRUE)
 system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -weg -vega", intern = T)
+# print off variance info
+cat(readChar("regress.tbl", 1e5))
 ```
 
 ### Run on the 10th chromosome.
@@ -100,6 +102,9 @@ system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practi
 setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 # marker 10
 system("qtdt -d practical_2/data/qtdt10.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -weg- -vega", intern = T)
+
+# print off variance info
+cat(readChar("regress.tbl", 1e5))
 ```
 
 
