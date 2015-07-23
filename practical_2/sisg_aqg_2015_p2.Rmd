@@ -1,8 +1,8 @@
 ---
 title: "sisg-2015-mod23-practical2"
-author: sisg23
+author: "sisg23"
 date: "July 23, 2015"
-output: html_document
+output: pdf_document
 ---
 
 ```{r}
@@ -73,9 +73,6 @@ ibd[1:23,1:ncol(ibd)]
 
 
 ```{r}
-setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
-
-
 # following lines from a document from ibg.colorado.edu/~howrigan/howrigan/.../Howrigan_WCPG_2010.pdf
 # THE 'system()' COMMAND:
 # #The system command is a way to use your computer terminal from within R. Within the system() function,
@@ -85,14 +82,30 @@ setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/
 # the output will be displayed in the R console.
 # #NOTE: this won't look as good in R as in terminal unless you have your width setup accordingly
 options(width=100) #works well
+```
 
+### Original run from the assignment
+
+```{r}
+setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 # Let's see if these files will work in QTDT
 # Once you've set up your binary directory for this analysis and have set R to that directory, do this:
-system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg", intern=TRUE)
+system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we- -veg-", intern=TRUE)
 system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -weg -vega", intern = T)
+```
 
+### Run on the 10th chromosome.
+#### Note: no variance showing up.
+```{r}
+setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 # marker 10
-system("qtdt -d practical_2/data/qtdt10.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -we -veg", intern = T)
+system("qtdt -d practical_2/data/qtdt10.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -weg- -vega", intern = T)
+```
 
+
+## Appendix
+```{r}
+sessionInfo()
+getwd()
 ```
 
