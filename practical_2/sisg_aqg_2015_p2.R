@@ -10,27 +10,6 @@
 
 setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 
-
-# Note: I borrowed the next few lines of code from howrigan_snp.cleaning.pdf (author info: https://www.atgu.mgh.harvard.edu/people/daniel_howrigan)
-
-# Once you've set up your PLINK directory for this analysis and have set R to that directory, do this:
-system("./plink",intern=TRUE)
-# If is says PLINK! in the first few lines, you're ready to go!
-
-# THE 'system()' COMMAND:
-# #The system command is a way to use your computer terminal from within R. Within the system() function,
-# whatever you put in quotes will be read as if that's what you typed in your terminal window. I'm doing all
-# my analyses using a UNIX shell (bash), and so in order to use the PLINK program, I have to put a './'
-# before I write 'plink'. Windows users only need to write 'plink'. In addition, I use 'intern=TRUE' so that
-# the output will be displayed in the R console.
-# #NOTE: this won't look as good in R as in terminal unless you have your width setup accordingly
-options(width=100) #works well
-
-
-#Let's see if these files will work in PLINK
-# Once you've set up your binary directory for this analysis and have set R to that directory, do this:
-#system("./plink --file test.snp --make-bed --out test2",intern=TRUE)
-
 data <- read.table("practical_2/data/data.txt", header = T)
 dim(data)
 data[1:2, 1:24]
@@ -72,9 +51,18 @@ head(ped)
 head(dat)
 head(ibd)
 
+
+# THE 'system()' COMMAND:
+# #The system command is a way to use your computer terminal from within R. Within the system() function,
+# whatever you put in quotes will be read as if that's what you typed in your terminal window. I'm doing all
+# my analyses using a UNIX shell (bash), and so in order to use the PLINK program, I have to put a './'
+# before I write 'plink'. Windows users only need to write 'plink'. In addition, I use 'intern=TRUE' so that
+# the output will be displayed in the R console.
+# #NOTE: this won't look as good in R as in terminal unless you have your width setup accordingly
+options(width=100) #works well
+
 # Let's see if these files will work in QTDT
 # Once you've set up your binary directory for this analysis and have set R to that directory, do this:
 system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg")
 system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd 3 -a- -weg -vega")
-
 

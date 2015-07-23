@@ -59,7 +59,7 @@ head(ibd)
 ```
 
 
-```{r, echo=T, results=T, message=TRUE, warnings=T}
+```{r}
 setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 
 
@@ -75,9 +75,8 @@ options(width=100) #works well
 
 # Let's see if these files will work in QTDT
 # Once you've set up your binary directory for this analysis and have set R to that directory, do this:
-system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg")
-system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd 3 -a- -weg -vega")
-
+system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg", intern=TRUE)
+system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd 3 -a- -weg -vega", intern = T)
 
 ```
 
