@@ -1,0 +1,83 @@
+---
+title: "sisg-2015-mod23-practical2"
+author: sisg23
+date: "July 23, 2015"
+output: html_document
+---
+
+
+```{r}
+setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
+
+data <- read.table("practical_2/data/data.txt", header = T)
+dim(data)
+data[1:2, 1:24]
+
+# Investigate the pi_hat_d values for the autosomes and X chromosome
+data[1:2, 25:47]
+# Take a look at the rest of the data matrix
+data[1:2, 48:59]
+
+```
+
+
+```{r}
+# Row means over a matrix can be calculated with the below function
+rowMeans(data[1:2, 2:23])
+# A similar function does not exist for row standard deviations and thus we
+# must appeal to the apply function
+head(apply(data[, 2:23], 1, sd))
+pihat.mean <- rowMeans(data[, 2:23])
+pihat.sd <- apply(data[, 2:23], 1, sd)
+ibd.mean <- rowMeans(data[, 25:46])
+ibd.sd <- apply(data[, 25:46], 1, sd)
+plot(pihat.mean, ibd.mean, pch = 20,
+col = 4, ylab = "Dominance relationship (mean IBD2 sharing)", xlab = "Additive relationship (mean IBD
+          sharing)")
+# Regress IBD2 on pi-hat. Use the lm function un R. Try ?lm if you are interested
+reg <- lm(ibd.mean ~ pihat.mean)
+abline(reg, lwd = 2.5)
+
+# Regress IBD on pi-hat. Use the lm function un R. Try ?lm if you are interested
+summary(lm(ibd.mean ~ pihat.mean))
+
+```
+
+
+```{r}
+# Read in .ped and .dat files
+setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
+ped <- read.table("practical_2/data/qtdt.ped")
+dat <- read.table("practical_2/data/qtdt.dat")
+ibd <- read.table("practical_2/data/qtdt.ibd")
+
+# The head of the .ped file. Two columns have been cut to fit in the listing
+head(ped)
+head(dat)
+head(ibd)
+
+```
+
+
+```{r, echo=T, results=T, message=TRUE, warnings=T}
+setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
+
+
+# following lines from a document from ibg.colorado.edu/~howrigan/howrigan/.../Howrigan_WCPG_2010.pdf
+# THE 'system()' COMMAND:
+# #The system command is a way to use your computer terminal from within R. Within the system() function,
+# whatever you put in quotes will be read as if that's what you typed in your terminal window. I'm doing all
+# my analyses using a UNIX shell (bash), and so in order to use the qtdt program, I have to put a './'
+# before I write 'qtdt'. Windows users only need to write 'qtdt'. In addition, I use 'intern=TRUE' so that
+# the output will be displayed in the R console.
+# #NOTE: this won't look as good in R as in terminal unless you have your width setup accordingly
+options(width=100) #works well
+
+# Let's see if these files will work in QTDT
+# Once you've set up your binary directory for this analysis and have set R to that directory, do this:
+system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg")
+system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd 3 -a- -weg -vega")
+
+
+```
+
