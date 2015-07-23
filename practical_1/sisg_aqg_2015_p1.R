@@ -48,6 +48,10 @@ cor(twin.dz$ht_t1, twin.dz$ht_t2)
 p <- ggplot(twin.dz, aes(x = ht_t1, y = ht_t2))
 p + geom_point() + geom_smooth(method = "lm")
 
+#Let's see if these files will work in pedstats
+# Once you've set up your pedstats directory for this analysis and have set R to that directory, do this:
+system("./pedstats -d practical_1/data/height_bmi.dat -p practical_1/data/height_bmi.ped",intern=TRUE)
+
 ped <- read.table("practical_1/data/height_bmi.ped", header = F)
 dim(ped)
 
