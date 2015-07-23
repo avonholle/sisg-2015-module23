@@ -5,7 +5,6 @@ date: "July 23, 2015"
 output: html_document
 ---
 
-
 ```{r}
 setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 
@@ -20,6 +19,18 @@ data[1:2, 48:59]
 
 ```
 
+## Exercise 1
+Calculate the sample mean and SD of $\hat\pi_a$ and $\hat\pi_d$:
+
+* for each autosome
+
+* genome-wide
+
+* Do a histogram of the genome-wide $\hat\pi_a$ and $\hat\pi_d$ (row means) and compare the mean and standard to that in the lectures.
+
+* plot genome-wide $\hat\pi_a$ against $\hat\pi_d$ for each sibling pair.
+
+* regress genome-wide $\hat\pi_d$ values on genome-wide $\hat\pi_a$.
 
 ```{r}
 # Row means over a matrix can be calculated with the below function
@@ -53,8 +64,10 @@ ibd <- read.table("practical_2/data/qtdt.ibd")
 
 # The head of the .ped file. Two columns have been cut to fit in the listing
 head(ped)
-head(dat)
+dat
 head(ibd)
+
+ibd[1:23,1:ncol(ibd)]
 
 ```
 
@@ -75,8 +88,11 @@ options(width=100) #works well
 
 # Let's see if these files will work in QTDT
 # Once you've set up your binary directory for this analysis and have set R to that directory, do this:
-system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg", intern=TRUE)
-system("./qtdt qtdt_mac -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd 3 -a- -weg -vega", intern = T)
+system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -a- -we -veg", intern=TRUE)
+system("qtdt -d practical_2/data/qtdt.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -weg -vega", intern = T)
+
+# marker 10
+system("qtdt -d practical_2/data/qtdt10.dat -p practical_2/data/qtdt.ped -i practical_2/data/qtdt.ibd -a- -we -veg", intern = T)
 
 ```
 
