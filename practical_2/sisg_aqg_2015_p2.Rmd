@@ -43,8 +43,7 @@ pihat.sd <- apply(data[, 2:23], 1, sd)
 ibd.mean <- rowMeans(data[, 25:46])
 ibd.sd <- apply(data[, 25:46], 1, sd)
 plot(pihat.mean, ibd.mean, pch = 20,
-col = 4, ylab = "Dominance relationship (mean IBD2 sharing)", xlab = "Additive relationship (mean IBD
-          sharing)")
+col = 4, ylab = "Dominance relationship (mean IBD2 sharing)", xlab = "Additive relationship (mean IBD sharing)")
 # Regress IBD2 on pi-hat. Use the lm function un R. Try ?lm if you are interested
 reg <- lm(ibd.mean ~ pihat.mean)
 abline(reg, lwd = 2.5)
@@ -106,7 +105,6 @@ system("qtdt -d practical_2/data/qtdt10.dat -p practical_2/data/qtdt.ped -i prac
 # print off variance info
 cat(readChar("regress.tbl", 1e5))
 ```
-
 
 ## Appendix
 ```{r}
