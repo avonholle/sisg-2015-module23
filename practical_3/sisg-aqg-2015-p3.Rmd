@@ -23,6 +23,9 @@ library(knitr)
 opts_knit$set(root.dir ='C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23')
 #setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
 
+#opts_chunk$set(cache = TRUE, cache.path = "knitrcache/test-")
+opts_chunk$set(cache = TRUE)
+
 #install.packages("Haplin")
 library(Haplin)
 #install.packages("qqman")
@@ -68,7 +71,7 @@ Given this short overview of PLINK we will now attempt to perform a GWAS on data
 
 
 ### File inspection
-Firstly, we will use R to inspect the .fam, .bim, and HT T X.pheno files. Let's have a quick look around these files and establish some of the properties of the data using R. As always, let's firstly read in the data.
+Firstly, we will use R to inspect the .fam, .bim, and HT_T_X.pheno files. Let's have a quick look around these files and establish some of the properties of the data using R. As always, let's firstly read in the data.
 
 ```{r}
 fam <- read.table("practical_3/data/QIMRX.fam")
@@ -99,7 +102,7 @@ head(pheno)
 
 ### Quality Control
 
-The quality control steps are critical to any analysis and often take more time then the analyses themselves. We will now work with PLINK 1.9 to do some QC on the binary les for the QIMR data on human height and transferrin levels. These QC step will include
+The quality control steps are critical to any analysis and often take more time then the analyses themselves. We will now work with PLINK 1.9 to do some QC on the binary files for the QIMR data on human height and transferrin levels. These QC step will include
 
 * Estimate the allele frequencies for all SNPs
 
@@ -157,6 +160,7 @@ system("plink2 --bfile practical_3/data/QIMRX --maf 0.05 --mind 0.1 --geno 0.01 
 
 ```
 
+
 Once the files have been moved, read the association results into R. We will first draw a manhattan plot.
 
 ```{r}
@@ -200,11 +204,171 @@ x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
 ```
 
 ## Exercise 2
-Repeat the GWAS for the second phenotype.
+
+* Repeat the GWAS for the second phenotype.
+  * Note to myself: Be sure to rename the output file for the second phenotype and specify which phenotype using the \textrm{--mpheno} flag (followed by ''2`` in this case). By default the first column in the .pheno file is used.
+  
+```{r}
+system("plink2 --bfile practical_3/data/QIMRX --maf 0.05 --mind 0.1 --geno 0.01 --hwe 0.001 --pheno practical_3/data/HT_T_X.pheno --mpheno 2 --linear --out practical_3/results/gwas_pheno_2", 
+intern = F)
+```
+
+
+* Produce the same plots as for height
+
+#### Note to myself: You have to rename the qassoc.linear file to .qassoc only to make the read.table function work.
+
+```{r}
+# first need to rename file because it won't work with names following 2 periods.
+file.rename(from = file.path("practical_3/results/", "gwas_pheno_2.qassoc.linear"), 
+            to = file.path("practical_3/results/", "gwas_pheno_2.qassoc"))
+
+# Read in the association results
+gwas.res2 <- read.table("practical_3/results/gwas_pheno_2.qassoc",
+header = T)
+dim(gwas.res2)
+head(gwas.res2)
+```
+
+```{r}
+# Build the data frame that the manhattan plot function requires
+man.df <- with(gwas.res2, data.frame(BP, CHR, P, SNP))
+# Load the manhattan plot library. If not installed use install.packages("qqman")
+#library(qqman)
+# Rename the columns for the manhattan function
+colnames(man.df) <- c("BP", "CHR", "P", "SNP")
+# Produce the manhattan plot. NOTE THAT THIS MAY TAKE SOME TIME AND MAY CRASH YOUR COMPUTER
+# IF IT HAS POOR RESOURCES
+manhattan(man.df)
+# Drawing a qq plot
+# -------------------
+obs.p <- gwas.res2$P
+# Order these
+obs.p.srt <- sort(obs.p)
+m.log10.obs.p <- -(log10(obs.p.srt))
+max.p <- max(m.log10.obs.p)
+exp.val <- seq(1, length(obs.p))
+m.log10.exp.val <- -log10((exp.val - 0.5) / length(exp.val))
+plot(c(0, max.p), c(0, max.p), col = "red", lwd = 2, type = "l",
+xlab = "Expected -log10(p)", ylab = "Observed -log10(p)",
+xlim = c(0, max.p), ylim = c(0, max.p), las = 1, xaxs = "i",
+yaxs = "i", bty = "l", main = "Trait 1")
+points(m.log10.exp.val, m.log10.obs.p)
+# Alternatively you can use a package. This has the added component of
+# having confidence interval bounds
+
+#install.packages("Haplin")
+#library(Haplin)
+x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
+```
+
+
+* Calculate $\lamdba_{GC}$ for both phenotypes.
+
+#### Note: not sure how you get the lambda
+
+## Exercise 3
+
+* Calculate the first 10 principal components of the genotype matrix
+
+* \textrm{plink2 --bfile practical 3/data/QIMRX --pca 10 --out practical 3/results/QIMRX}
+
+
+```{r}
+system("plink2 --bfile practical_3/data/QIMRX --pca 10 --out practical_3/results/QIMRX", intern=T)
+```
+
+
+* Rerun the association analysis with these 10 PCs
+  * \textrm{plink2 --bfile practical 3/data/QIMRX --maf 0.05 --geno 0.1 --mind 0.01 -hwe 0.001 --linear --covar practical 3/results/QIMRX.eigenvec --pheno practical 3/data/HT_T_X.pheno --mpheno 2 --out practical 3/results/QIMRX ST2}
+
+
+```{r}
+system("plink2 --bfile practical_3/data/QIMRX --maf 0.05 --geno 0.1 --mind 0.01 -hwe 0.001 --linear --covar practical_3/results/QIMRX.eigenvec --pheno practical_3/data/HT_T_X.pheno --mpheno 2 --out practical_3/results/QIMRX_ST2",
+       intern=T)
+```
+
+* Read the results back into R
+
+#### Note to myself: You have to rename the qassoc.linear file to .qassoc only to make the read.table function work.
+
+
+```{r}
+# first need to rename file because it won't work with names following 2 periods.
+file.rename(from = file.path("practical_3/results/", "QIMRX_ST2.assoc.linear"), 
+            to = file.path("practical_3/results/", "QIMRX_ST2.assoc"))
+
+
+# Read in the association results
+gwas.res3 <- read.table("practical_3/results/QIMRX_ST2.assoc",
+header = T)
+dim(gwas.res3)
+head(gwas.res3)
+
+```
+
+
+* Subset the data to only leave the estimates for the SNPs
+
+* \textrm{man.df <- subset(gwas.res, TEST=='ADD',c('BP','CHR','P','SNP'))}
+
+```{r}
+# Build the data frame that the manhattan plot function requires
+#man.df <- with(gwas.res3, data.frame(BP, CHR, P, SNP))
+man.df <- subset(gwas.res3, TEST=='ADD', c('BP','CHR','P','SNP'))
+```
+
+* Alternatively you can use grep "ADD" over the output file.
+
+* Re-draw the manhattan plots
+
+```{r}
+# Produce the manhattan plot. NOTE THAT THIS MAY TAKE SOME TIME AND MAY CRASH YOUR COMPUTER
+# IF IT HAS POOR RESOURCES
+manhattan(man.df)
+# Drawing a qq plot
+# -------------------
+obs.p <- gwas.res3$P
+# Order these
+obs.p.srt <- sort(obs.p)
+m.log10.obs.p <- -(log10(obs.p.srt))
+max.p <- max(m.log10.obs.p)
+exp.val <- seq(1, length(obs.p))
+m.log10.exp.val <- -log10((exp.val - 0.5) / length(exp.val))
+plot(c(0, max.p), c(0, max.p), col = "red", lwd = 2, type = "l",
+xlab = "Expected -log10(p)", ylab = "Observed -log10(p)",
+xlim = c(0, max.p), ylim = c(0, max.p), las = 1, xaxs = "i",
+yaxs = "i", bty = "l", main = "Trait 1")
+points(m.log10.exp.val, m.log10.obs.p)
+# Alternatively you can use a package. This has the added component of
+# having confidence interval bounds
+
+#install.packages("Haplin")
+#library(Haplin)
+x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
+```
+
+
+* Calculate \lamdbda_{GC} for both phenotypes.
+
+* You may find the following command useful to clump your results into ``roughly'' independent regions
+  * \textrm{plink --bfile practical 3/data/QIMRX --clump QIMRX ST2.assoc.linear --clump-p1 0.5 --clump-p2 0.5 --clump-r2 0.20 --clump-kb 500 --out hgt gwas clump}
 
 ## Additional exercise
+
 Use PLINK to do a test for dominance for the top 5 SNPs for height. Is there any evidence for dominance?
 
 ```{r}
-system("plink2 --bfile practical_3/data/QIMRX --extract practical_3/data/top_snps.txt --pheno practical_3/data/HT_T_X.pheno --mpheno 1 --linear --genotypic  --out practical_3/results/dom_test.txt", intern = F)
+system("plink2 --bfile practical_3/data/QIMRX --extract practical_3/data/top_snps.txt --pheno practical_3/data/HT_T_X.pheno --mpheno 1 --linear genotypic  --out practical_3/results/dom_test", intern = F)
 ```
+
+```{r}
+# first need to rename file because it won't work with names following 2 periods.
+file.rename(from = file.path("practical_3/results/", "dom_test.assoc.linear"), 
+            to = file.path("practical_3/results/", "dom_test.assoc"))
+
+# print off variance info
+cat(readChar("practical_3/results/dom_test.assoc", 1e5))
+
+```
+
