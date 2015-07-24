@@ -1,0 +1,210 @@
+---
+title: "sisg-aqg-2015-p3"
+author: "SISG module 23"
+date: "July 24, 2015"
+output: html_document
+---
+
+
+```{r}
+# ===============================================================
+# Summer Institute in Statistical Genetics, 2015, Seattle
+# Advanced Quantitative Genetics
+# Practical 3 
+# Date:
+# Author:
+# ===============================================================
+```
+
+
+```{r}
+library(knitr)
+# see https://github.com/yihui/knitr/issues/277
+opts_knit$set(root.dir ='C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23')
+#setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
+
+#install.packages("Haplin")
+library(Haplin)
+#install.packages("qqman")
+library(qqman)
+```
+
+```{r}
+alpha = 5e-8
+threshold = qchisq(1-alpha, 1)
+q2 = 0.005
+n = 10000
+ncp = n*q2/(1-q2)
+power = 1-pchisq(threshold, 1, ncp)
+threshold
+ncp
+power
+```
+
+#### Note: for following runs in plink2 may want to double check in plink because plink2 is in beta development.
+
+### Exercise 1
+
+* How many individuals would you need to detect a locus that explains 1\% with a power of 80\%?
+
+
+## Let's attempt to use PLINK to convert the .ped and .map files to binary format.
+
+```{r}
+# Once you've set up your binary directory for this analysis and have set R to that directory, do this:
+
+# Convert from .ped and .map PLINK format to binary
+system("plink2 --bfile practical_3/data/QIMRX --make-bed --out QIMRX")
+```
+
+
+## Running a GWAS
+
+Given this short overview of PLINK we will now attempt to perform a GWAS on data from human height and serum transferrin levels. This will be done in three steps:
+
+* File inspection
+* QC
+* GWAS for human height and serum transferrin level
+
+
+### File inspection
+Firstly, we will use R to inspect the .fam, .bim, and HT T X.pheno files. Let's have a quick look around these files and establish some of the properties of the data using R. As always, let's firstly read in the data.
+
+```{r}
+fam <- read.table("practical_3/data/QIMRX.fam")
+bim <- read.table("practical_3/data/QIMRX.bim")
+pheno <- read.table("practical_3/data/HT_T_X.pheno")
+```
+
+```{r}
+# Count the number of genotyped individuals. Number of rows
+dim(fam)
+head(fam)
+```
+
+```{r}
+# Count the number of genotyped SNPs
+dim(bim)
+head(bim)
+```
+
+```{r}
+# Count the number of individuals with height and transferrin
+# measurements
+dim(pheno)
+dim(pheno[complete.cases(pheno), ])
+head(pheno)
+```
+
+
+### Quality Control
+
+The quality control steps are critical to any analysis and often take more time then the analyses themselves. We will now work with PLINK 1.9 to do some QC on the binary les for the QIMR data on human height and transferrin levels. These QC step will include
+
+* Estimate the allele frequencies for all SNPs
+
+* Calculate SNP and individual missingness
+
+* Calculate p-values for Hardy-Weinberg (HW)
+
+Each of the below commands should produce a le with an extension that is indicative of the process used. Unlike previous programs PLINK allows for an out directory to be specified with --out. We will put all our results in the practical 3/results folder. Execute the following command line arguments to produce three files for allele frequency, missingness, and HW.
+
+```{r}
+system("plink2 --bfile practical_3/data/QIMRX --freq --out practical_3/results/QIMRX", intern = F)
+system("plink2 --bfile practical_3/data/QIMRX --missing --out practical_3/results/QIMRX", intern = F)
+system("plink2 --bfile practical_3/data/QIMRX --hardy --out practical_3/results/QIMRX", intern = F)
+
+```
+
+Mini Exercise - Run these same commands but with PLINK 1 to recognise the incredible differences in speed that PLINK 2 others. For large analyses these speed ups make all the difference between being able to complete analyses or not { additionally, RAM is often the limiting factor rather than CPU time and PLINK v1.9 has a much lower memory profile when compared to the first version.
+
+Read the resultant files into R and attempt to answer the following questions
+
+* How many SNPs have MAF > 0.05?
+
+* How many individuals have missingness > 10%?
+
+* How many SNPs have missingness of > 1%?
+
+* How many SNPs have a HWE p-value < 0.001?
+
+Below are some hints on how to do this
+
+```{r}
+# Read in the .frq file
+frq <- read.table("practical_3/results/QIMRX.frq", header = T, na = "NA")
+head(frq)
+```
+
+```{r}
+# Find the proportion of those with missingness less than 0.05
+prop.lw.maf <- sum((frq$MAF < 0.05)) / length(frq$MAF)
+# The sum component above is summing up the true values
+# Look at what (frq$MAF < 0.05) does to get a better feel for
+# this solution. Can be done in many other ways
+prop.lw.maf
+# Do something similar for the rest of the questions
+```
+
+
+### Running a GWAS
+The work above was designed to investigate what PLINK can do on-the-fly with the filtering commands in listing 7. We can do all of these steps and the GWAS in one command with PLINK. In the terminal execute a similar command as in listing 7 using the quality control flags from listing 3 along with the --assoc flag to run a GWAS with MAF filter 0.05, individual missing rate 0.1, SNP missing rate 0.01, and Hardy-Weinberg of 0.001. Note that this will be quite a long terminal command. Remember to give the out path to the practical 3/results folder.
+
+
+```{r}
+
+system("plink2 --bfile practical_3/data/QIMRX --maf 0.05 --mind 0.1 --geno 0.01 --hwe 0.001 --pheno practical_3/data/HT_T_X.pheno --assoc --out practical_3/results/gwas_pheno_1", intern = F)
+
+```
+
+Once the files have been moved, read the association results into R. We will first draw a manhattan plot.
+
+```{r}
+# Read in the association results
+gwas.res <- read.table("practical_3/results/gwas_pheno_1.qassoc",
+header = T)
+dim(gwas.res)
+head(gwas.res)
+```
+
+```{r}
+# Build the data frame that the manhattan plot function requires
+man.df <- data.frame(gwas.res$BP, gwas.res$CHR, gwas.res$P, gwas.res$SNP)
+# Load the manhattan plot library. If not installed use install.packages("qqman")
+#library(qqman)
+# Rename the columns for the manhattan function
+colnames(man.df) <- c("BP", "CHR", "P", "SNP")
+# Produce the manhattan plot. NOTE THAT THIS MAY TAKE SOME TIME AND MAY CRASH YOUR COMPUTER
+# IF IT HAS POOR RESOURCES
+manhattan(man.df)
+# Drawing a qq plot
+# -------------------
+obs.p <- gwas.res$P
+# Order these
+obs.p.srt <- sort(obs.p)
+m.log10.obs.p <- -(log10(obs.p.srt))
+max.p <- max(m.log10.obs.p)
+exp.val <- seq(1, length(obs.p))
+m.log10.exp.val <- -log10((exp.val - 0.5) / length(exp.val))
+plot(c(0, max.p), c(0, max.p), col = "red", lwd = 2, type = "l",
+xlab = "Expected -log10(p)", ylab = "Observed -log10(p)",
+xlim = c(0, max.p), ylim = c(0, max.p), las = 1, xaxs = "i",
+yaxs = "i", bty = "l", main = "Trait 1")
+points(m.log10.exp.val, m.log10.obs.p)
+# Alternatively you can use a package. This has the added component of
+# having confidence interval bounds
+
+#install.packages("Haplin")
+#library(Haplin)
+x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
+```
+
+## Exercise 2
+Repeat the GWAS for the second phenotype.
+
+## Additional exercise
+Use PLINK to do a test for dominance for the top 5 SNPs for height. Is there any evidence for dominance?
+
+```{r}
+system("plink2 --bfile practical_3/data/QIMRX --extract practical_3/data/top_snps.txt --pheno practical_3/data/HT_T_X.pheno --mpheno 1 --linear --genotypic  --out practical_3/results/dom_test.txt", intern = F)
+```
