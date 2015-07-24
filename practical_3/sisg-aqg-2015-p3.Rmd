@@ -264,7 +264,7 @@ x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
 ```
 
 
-* Calculate $\lamba_{GC}$ for both phenotypes.
+* Calculate $\lambda_{GC}$ for both phenotypes.
 
 #### Note: not sure how you get the lambda
 
@@ -272,19 +272,17 @@ x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
 
 * Calculate the first 10 principal components of the genotype matrix
 
-* \textrm{plink2 --bfile practical 3/data/QIMRX --pca 10 --out practical 3/results/QIMRX}
+* \textrm{plink2 --bfile practical 3/data/QIMRX --pca 10 --out practical_3/results/QIMRX}
 
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=F}
 system("plink2 --bfile practical_3/data/QIMRX --pca 10 --out practical_3/results/QIMRX", intern=F)
 ```
 
 
 * Rerun the association analysis with these 10 PCs
-  * \textrm{plink2 --bfile practical 3/data/QIMRX --maf 0.05 --geno 0.1 --mind 0.01 -hwe 0.001 --linear --covar practical 3/results/QIMRX.eigenvec --pheno practical 3/data/HT_T_X.pheno --mpheno 2 --out practical 3/results/QIMRX ST2}
 
-
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=F}
 system("plink2 --bfile practical_3/data/QIMRX --maf 0.05 --geno 0.1 --mind 0.01 -hwe 0.001 --linear --covar practical_3/results/QIMRX.eigenvec --pheno practical_3/data/HT_T_X.pheno --mpheno 2 --out practical_3/results/QIMRX_ST2",
        intern=F)
 ```
@@ -353,7 +351,7 @@ x <- pQQ(obs.p.srt, nlabs = 6, conf = 0.95)
 * Calculate $\lambda_{GC}$ for both phenotypes.
 
 * You may find the following command useful to clump your results into ``roughly'' independent regions
-  * \textrm{plink --bfile practical 3/data/QIMRX --clump QIMRX ST2.assoc.linear --clump-p1 0.5 --clump-p2 0.5 --clump-r2 0.20 --clump-kb 500 --out hgt gwas clump}
+  * \textrm{plink --bfile practical\_3/data/QIMRX --clump QIMRX_ST2.assoc.linear --clump-p1 0.5 --clump-p2 0.5 --clump-r2 0.20 --clump-kb 500 --out hgt gwas clump}
 
 ## Additional exercise
 
