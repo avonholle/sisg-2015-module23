@@ -1,0 +1,141 @@
+---
+title: "sisg-aqg-2015-p3"
+author: "SISG module 23"
+date: "July 24, 2015"
+output: html_document
+---
+
+
+```{r}
+# ===============================================================
+# Summer Institute in Statistical Genetics, 2015, Seattle
+# Advanced Quantitative Genetics
+# Practical 3 
+# Date:
+# Author:
+# ===============================================================
+```
+
+[Link to GCTA]{cnsgenomics.com/software/gcta/}
+[Link to power calculator (in Shiny)]{cnsgenomics.com/shiny/gctaPower/}
+
+
+```{r}
+library(knitr)
+# see https://github.com/yihui/knitr/issues/277
+opts_knit$set(root.dir ='C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23')
+#setwd("C:/Users/vonholle/Documents/grad_school/misc/training/sisg-2015/module23/sisg-2015-module23") # Windows
+```
+
+```{r}
+# Read in the gzipped GRM file
+grm <- read.table("practical_4/data/QIMRX.grm.gz")
+head(grm)
+```
+
+## Estimating proportion of phenotypic variation due to additive genetic factors using GCTA
+
+### Let's use the GRM matrix to estimate the proportion of phenotypic variance explained by additive genome-wide SNPs for height and serum transferrin.
+
+```{r, eval=FALSE}
+# Once you've set up your binary directory for this analysis and have set R to that directory (I moved the binaries to my working directory above), do this:
+system("gcta --grm practical_4/data/QIMRX --pheno practical_4/data/HT_T_X.pheno --mpheno 1 --reml --out practical_4/results/QIMRX_1", intern=TRUE)
+
+system("gcta --grm practical_4/data/QIMRX --pheno practical_4/data/HT_T_X.pheno --mpheno 2 --reml --out practical_4/results/QIMRX_2", intern=T)
+```
+
+```{r}
+# Read in GREML result files
+hsq.1 <- read.table("practical_4/results/QIMRX_1.hsq", header = T, fill = T)
+hsq.2 <- read.table("practical_4/results/QIMRX_2.hsq", header = T, fill = T)
+head(hsq.1)
+```
+
+## Exercise 1
+
+* What is the percentage of phenotypic variance that is explained by common SNPs for both traits?
+
+* Are the heritability estimates signicant?
+
+* Are the heritability values what you expect?
+
+We will now take a closer look at some of the properties of the GRM by reading using R
+
+```{r}
+names(grm) <- c("IND_1", "IND_2", "SNP_NUM", "REL")
+dim(grm)
+# Take out the diagonal elements
+grm.diag <- grm[which(grm$IND_1 == grm$IND_2), ]
+dim(grm.diag)
+head(grm.diag)
+
+# Take out the GRM off-diagonal elements
+grm.off.diag <- grm[which(grm$IND_1 != grm$IND_2), ]
+# Make a histogram of the diagonals
+hist(grm.diag[, 4], breaks = 2500, freq = F,
+xlab = "GRM diagonals", xlim = c(0.95, 1.2), main = "")
+# Make a histogram of the GRM off-diagonal relatedness estimates
+par(mfrow = c(2, 1))
+hist(grm.off.diag[, 4], breaks = 2500, freq = F,
+xlab = "GRM off-diagonals", xlim = c(-0.1, 0.1), main = "")
+hist(grm.off.diag[which(grm.off.diag[, 4] > 0.1), 4],
+breaks = 200, freq = F,
+xlab = "GRM off-diagonals", xlim = c(0.1, 1.1), main = "")
+```
+
+In the above results the relatedness may have affected the estimate of heritability (Fig. 2 panel 2). We will remove the relatedness and see whether the results change. This is done with GCTA via the --grm-cutoff 0.025 flag and the line in listing 11.
+
+
+#### Note: run this following chunk once to get the files then set to eval=F
+
+```{r, eval=FALSE}
+system("gcta --mgrm practical_4/data/QIMRX_multi.txt --pheno practical_4/data/HT_T_X.pheno --mpheno 1 --reml --grm-cutoff 0.025 --out practical_4/results/QIMRX_nr_1", intern=T)
+
+system("gcta --mgrm practical_4/data/QIMRX_multi.txt --pheno practical_4/data/HT_T_X.pheno --mpheno 2 --reml --grm-cutoff 0.025 --out practical_4/results/QIMRX_nr_2", intern=T)
+```
+
+## Exercise 2
+
+* Repeat the REML analyses as in exercise 1 but with relatedness removed
+
+* Compare the results with those in exercise 1 (using listing 9) and from Yang et al. (2010) (for trait 1 height)
+
+```{r}
+# Read in GREML result files without relatedness.
+grm.nr <- read.table("practical_4/data/QIMRX_nr.grm.gz")
+# Create the same figures as above
+# Note that these are only example file extensions
+# and may change depending on what you want to call the files
+hsq.1.nr <- read.table("practical_4/results/QIMRX_nr_1.hsq", header = T, fill = T)
+hsq.2.nr <- read.table("practical_4/results/QIMRX_nr_2.hsq", header = T, fill = T)
+
+```
+
+Notes from lecture today: $SE(\hat h^2_{SNP}) = frac{300}{N}$.
+
+## Partitioning the variance via minor allele frequency
+
+We will now investigate partitioning variance components by creating two GRM matrices. One will be created with SNPs with lower MAFs and another with those that have higher MAFs.
+
+The GRMs were built with the command and it is best if you try to build these in your own time as the process is computationally expensive.
+
+### Preparing the GRMs for variance partitioning
+```{r, eval=FALSE}
+system("gcta --bfile practical_4/data/QIMRX_cleaned --extract practical_4/data/bot_maf_snps.txt --autosome --make-grm --keep QIMRX_nr.grm.id --out practical_4/data/QIMRX_bot_maf_snps", intern = T)
+
+system("gcta --bfile practical_4/data/QIMRX_cleaned --extract practical_4/data/top_maf_snps.txt --autosome --make-grm --keep QIMRX_nr.grm.id --out practical_4/data/QIMRX_top_maf_snps", intern = T)
+
+```
+
+### Partitioning variance components via GREML
+```{r}
+system("gcta --mgrm practical_4/data/QIMRX_multi.txt --pheno practical_4/data/HT_T_X.pheno --mpheno 1 --reml --out practical_4/results/QIMRX_1_multi_nr", intern=T)
+```
+
+## Exercise 3
+
+* Repeat for phenotype 2
+
+* What do you observe for the different variance component estimates from the GRMs of low and high MAF SNPs?
+
+* Is this what we expect?
