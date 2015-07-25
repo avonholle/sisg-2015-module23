@@ -1,4 +1,4 @@
-# [Summer Institute in Statistical Genetics, 2015, Seattle]{http://www.biostat.washington.edu/suminst/sisg/general}
+# [Summer Institute in Statistical Genetics, 2015, Seattle](http://www.biostat.washington.edu/suminst/sisg/general)
 
 ## Advanced Quantitative Genetics
 ### Module 23
